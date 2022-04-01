@@ -1,14 +1,14 @@
-#include <iostream>
-#include "mcts.h"
-using namespace std;
+#include "../include/pcutils.h"
+#include "../include/mcts.h"
 
-void get_pcd()
+int main()
 {
-    
-}
+    pointcloud::Node nd;
+    std::string inputPath = "/home/hs/catkin_ws/src/real_mcts/data/with_sampling_3.pcd";
+    std::vector<pointcloud::Point3D*> inputPoints = nd.ReadPCDToVector(inputPath);
 
-int main(int argc, char **argv)
-{
-    MCTS mcts = MCTS();
-    mcts.print();
+    std::cout << inputPoints.size() << std::endl;
+
+    montecarlo::standard st;
+    st.print();
 }

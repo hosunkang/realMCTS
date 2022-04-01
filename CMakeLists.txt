@@ -17,5 +17,8 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
+add_library(pcutils src/pcutils.cpp)
+add_library(mcts src/mcts.cpp)
+
 add_executable(main src/main.cpp)
-target_link_libraries(main ${catkin_LIBRARIES})
+target_link_libraries(main pcutils mcts ${catkin_LIBRARIES})

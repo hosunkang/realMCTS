@@ -1,6 +1,8 @@
+#include "../include/pcutils.h"
 
-
-std::vector<Point3D*> Node::ReadPCDToVector(std::string inputPath)
+namespace pointcloud
+{
+    std::vector<Point3D*> Node::ReadPCDToVector(std::string inputPath)
     {
         std::ifstream fin;
         fin.open(inputPath);
@@ -28,3 +30,4 @@ std::vector<Point3D*> Node::ReadPCDToVector(std::string inputPath)
         fin.close();
         return mPoints;
     }
+}
