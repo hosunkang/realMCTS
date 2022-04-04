@@ -46,7 +46,7 @@ namespace pointcloud
         Point2D mEndNodeXZ;
     };
 
-    class Node
+    class pcdFile
     {
     public:
         std::vector<Point3D*> ReadPCDToVector(std::string inputPath);      // modified

@@ -2,7 +2,7 @@
 
 namespace pointcloud
 {
-    std::vector<Point3D*> Node::ReadPCDToVector(std::string inputPath)
+    std::vector<Point3D*> pcdFile::ReadPCDToVector(std::string inputPath)
     {
         std::ifstream fin;
         fin.open(inputPath);

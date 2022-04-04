@@ -3,12 +3,12 @@
 
 int main()
 {
-    pointcloud::Node nd;
+    pointcloud::pcdFile fi;
     std::string inputPath = "/home/hs/catkin_ws/src/real_mcts/data/with_sampling_3.pcd";
-    std::vector<pointcloud::Point3D*> inputPoints = nd.ReadPCDToVector(inputPath);
+    std::vector<pointcloud::Point3D*> inputPoints = fi.ReadPCDToVector(inputPath);
 
     std::cout << inputPoints.size() << std::endl;
 
     montecarlo::standard st;
-    st.print();
+    st.main();
 }

@@ -2,9 +2,27 @@
 
 namespace montecarlo
 {
-    void standard::print()
+    void standard::main()
     {
-        std::cout << "hellow, world" << std::endl;
-
+        selection();
+        expansion();
+        simulation();
+        backprop();
+    }
+    void standard::selection()
+    {
+        std::cout << "Selection" << std::endl;
+    }
+    void standard::expansion()
+    {
+        std::cout << "expansion" << std::endl;
+    }
+    void standard::simulation()
+    {
+        std::cout << "simulation" << std::endl;
+    }
+    void standard::backprop()
+    {
+        std::cout << "backprop" << std::endl;
     }
 }
