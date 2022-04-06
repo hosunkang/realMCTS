@@ -5,12 +5,23 @@ namespace montecarlo
 {
     void standard::main(std::vector<pointcloud::Point3D*> legs, std::vector<pointcloud::Point3D*> pts)
     {
-        std::vector<float> goal = {1.0,1.0,1.0, 1.5,1.5,1.5};
-        Node *rnd = get_rootND(legs);
-        Node *snd = selection(rnd, pts);
-        Node *end = expansion(snd);
-        bool rslt = simulation(end, pts, goal);
-        std::cout <<rslt << std::endl;
+        std::vector<float> goal = {-0.25,3.5, 0.25,4.0};
+        Node *rnd = get_rootND(legs);;
+        for(int i=0; i<1000;i++)
+        {
+            std::cout << i << "th iteration" << std::endl;
+            Node *snd = selection(rnd, pts);
+            Node *end = expansion(snd);
+            bool rslt = simulation(end, pts, goal);
+            backprop(rslt, end);
+            // std::cout <<rslt << std::endl;
+            for(int j=0; j<rnd->childNDs[0]->childNDs.size(); j++)
+            {
+                std::cout << j << "th: "<<rnd->childNDs[0]->childNDs[j]->utc;
+                std::cout << "  "<<rnd->childNDs[0]->childNDs[j]->val;
+                std::cout << "  "<<rnd->childNDs[0]->childNDs[j]->vis << std::endl;
+            }
+        }
         memoryDelete(rnd);
     }
     Node *standard::selection(Node *nd, std::vector<pointcloud::Point3D*> pts)
@@ -22,14 +33,14 @@ namespace montecarlo
         Node* snd = new Node();
         if(nd->candiNDs.size() == 0 && nd->childNDs.size() != 0)
         {
-            int max = -100;
+            float max = -10;
             Node* temp_nd = new Node();
             for(int i=0; i<nd->childNDs.size(); i++)
             {
                 if(nd->childNDs[i]->utc > max)
                 {
                     temp_nd = nd->childNDs[i];
-                    max = nd->childNDs[i]->utc;
+                    max = temp_nd->utc;
                 }
             }
             snd = standard::selection(temp_nd, pts);
@@ -45,7 +56,7 @@ namespace montecarlo
         Node *end = new Node();
         if(nd->candiNDs.size() != 0)
         {
-            end = nd->candiNDs[rand()%(nd->candiNDs.size())];
+            end = nd->candiNDs[rand()%nd->candiNDs.size()];
             nd->childNDs.push_back(end);
             for(int i=0;i<nd->candiNDs.size();i++)
             {
@@ -66,6 +77,7 @@ namespace montecarlo
     {
         pointcloud::Point3D* standLeg = nd->pos;
         pointcloud::Point3D* swingLeg = nd->parentND->pos;
+        std::vector<pointcloud::Point3D*> candiPTs;
         while(1)
         {
             pointcloud::Point3D robotCenter = get_robotcenter(standLeg, swingLeg);
@@ -73,25 +85,57 @@ namespace montecarlo
             {
                 return 1;
             }
-            else:
+            else
             {
-
+                candiPTs = get_simulND(standLeg, swingLeg, pts);
+                if(candiPTs.size()==0)
+                {
+                    return 0;
+                }
+                swingLeg = standLeg;
+                standLeg = candiPTs[rand()%candiPTs.size()];
             }
         }
     }
-    void standard::backprop()
+    void standard::backprop(bool result, Node *nd)
     {
-        std::cout << "backprop" << std::endl;
+        nd->vis += 1;
+        if(result == 1)
+        {
+            nd->val += 1;
+        }
+        if(nd->parentND != NULL)
+        {
+            backprop(result, nd->parentND);
+            for(int i=0; i< nd->parentND->childNDs.size(); i++)
+            {
+                nd->parentND->childNDs[i]->utc = utcFunc(nd->parentND->childNDs[i]);
+            }
+        }
     }
 
     /////////////////////////////////////////////
     //////////////////// Utils //////////////////
     /////////////////////////////////////////////
+    float standard::utcFunc(Node* nd)
+    {
+        int w = nd->val;
+        int n = nd->vis;
+        int t = nd->parentND->vis;
+        if(n != 0)
+        {
+            float utc = float(w)/n+sqrt(2*log10(t)/n);
+            return utc;
+        }            
+        else 
+        {
+            return 0;
+        }
+    }
     bool standard::check_goal(pointcloud::Point3D center, std::vector<float> goal)
     {  
-        if(goal[0]<center.GetX() && center.GetX()<goal[3] &&
-           goal[1]<center.GetY() && center.GetY()<goal[4] &&
-           goal[2]<center.GetZ() && center.GetZ()<goal[5]) {return 1;}
+        if(goal[0]<center.GetX() && center.GetX()<goal[2] &&
+           goal[1]<center.GetZ() && center.GetZ()<goal[3]) {return 1;}
         else {return 0;}
     }
     void standard::printNDpos(Node *nd)
@@ -102,9 +146,9 @@ namespace montecarlo
     }
     Node *standard::get_rootND(std::vector<pointcloud::Point3D*> spts)
     {
-        Node* nd = new Node();
+        Node* nd = new Node(spts[0],1,0,0,NULL,{},{});
         nd->pos = spts[0];
-        Node* temp = new Node(spts[1],1,0,0,NULL,{},{});
+        Node* temp = new Node(spts[1],1,0,0,nd,{},{});
         nd->childNDs.push_back(temp);
         return nd;
     }
@@ -126,13 +170,30 @@ namespace montecarlo
     {
         for(int i=0; i<pts.size(); i++)
         {
-            float width = get_dist(nd->pos, pts[i]);
-            if(width < 1)
+            float distance = get_dist(nd->pos, pts[i]);
+            float forward = pts[i]->GetZ() - nd->pos->GetZ();
+            float width = pts[i]->GetX() - nd->pos->GetX();
+            if(0.4 < distance && distance< 0.6 && forward > 0 && std::abs(width) > 0.4)
             {   
                 Node* temp = new Node(pts[i],nd); 
                 nd->candiNDs.push_back(temp);
             }
         }
+    }
+    std::vector<pointcloud::Point3D*> standard::get_simulND(pointcloud::Point3D* stand,pointcloud::Point3D* swing, std::vector<pointcloud::Point3D*> pts)
+    {
+        std::vector<pointcloud::Point3D*> candis;
+        for(int i=0; i<pts.size(); i++)
+        {
+            float distance = get_dist(stand, pts[i]);
+            float forward = pts[i]->GetZ() - stand->GetZ();
+            float width = pts[i]->GetX() - stand->GetX();
+            if(0.4 < distance && distance< 0.6 && forward > 0 && std::abs(width) > 0.4)
+            {
+                candis.push_back(pts[i]);
+            }
+        }
+        return candis;
     }
     void standard::memoryDelete(Node *nd)
     {

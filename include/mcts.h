@@ -39,13 +39,15 @@ namespace montecarlo
         float get_dist(pointcloud::Point3D*, pointcloud::Point3D*);
         pointcloud::Point3D get_robotcenter(pointcloud::Point3D*, pointcloud::Point3D*); 
         bool check_goal(pointcloud::Point3D, std::vector<float>);
+        std::vector<pointcloud::Point3D*> get_simulND(pointcloud::Point3D*,pointcloud::Point3D*, std::vector<pointcloud::Point3D*>);
+        float utcFunc(Node*);
         void memoryDelete(Node*);
 
         Node *get_rootND(std::vector<pointcloud::Point3D*>);
         Node *selection(Node*, std::vector<pointcloud::Point3D*>);
         Node *expansion(Node*);
         bool simulation(Node*, std::vector<pointcloud::Point3D*>, std::vector<float>);
-        void backprop();
+        void backprop(bool, Node*);
     private:
         bool stepleg;
     };
