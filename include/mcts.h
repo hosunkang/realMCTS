@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <random>
 #include "../include/pcutils.h"
 
 namespace montecarlo
@@ -31,16 +32,19 @@ namespace montecarlo
     class standard
     {
     public:
-        void main(std::vector<pointcloud::Point3D*> legs, std::vector<pointcloud::Point3D*> pts);
+        void main(std::vector<pointcloud::Point3D*>, std::vector<pointcloud::Point3D*>);
 
-        void printNDpos(Node nd);
-        Node get_rootND(std::vector<pointcloud::Point3D*> spts);
-        void get_candiND(Node* nd, std::vector<pointcloud::Point3D*> pts);
-        float get_dist(pointcloud::Point3D* pt1, pointcloud::Point3D* pt2);
+        void printNDpos(Node*);
+        void get_candiND(Node*, std::vector<pointcloud::Point3D*>);
+        float get_dist(pointcloud::Point3D*, pointcloud::Point3D*);
+        pointcloud::Point3D get_robotcenter(pointcloud::Point3D*, pointcloud::Point3D*); 
+        bool check_goal(pointcloud::Point3D, std::vector<float>);
+        void memoryDelete(Node*);
 
-        Node selection(Node nd, std::vector<pointcloud::Point3D*> pts);
-        Node expansion(Node nd);
-        bool simulation();
+        Node *get_rootND(std::vector<pointcloud::Point3D*>);
+        Node *selection(Node*, std::vector<pointcloud::Point3D*>);
+        Node *expansion(Node*);
+        bool simulation(Node*, std::vector<pointcloud::Point3D*>, std::vector<float>);
         void backprop();
     private:
         bool stepleg;

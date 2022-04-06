@@ -33,18 +33,14 @@ namespace pointcloud
         float GetX() const { return mX; }
         float GetY() const { return mY; }
         float GetZ() const { return mZ; }
-        Point2D GetEndNodeXZ() const { return mEndNodeXZ; }
 
-        void SetX(float x) { this->mX = x; }
-        void SetY(float y) { this->mY = y; }
-        void SetZ(float z) { this->mZ = z; }
+        void SetX(float x) { mX = x; }
+        void SetY(float y) { mY = y; }
+        void SetZ(float z) { mZ = z; }
         void SetXYZ(float x, float y, float z) { this->mX = x; this->mY = y; this->mZ = z; }
-        void SetEndNodeXZ(Point2D endNodeXZ) { this->mEndNodeXZ = endNodeXZ; }
-        void SetEndNodeXZ(float x, float z) { this->mEndNodeXZ.SetX(x); this->mEndNodeXZ.SetZ(z); }
 
     private:
         float mX, mY, mZ;
-        Point2D mEndNodeXZ;
     };
 
     class pcdFile
