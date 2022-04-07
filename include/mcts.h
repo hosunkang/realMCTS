@@ -48,6 +48,7 @@ namespace montecarlo
         Node *expansion(Node*);
         bool simulation(Node*, std::vector<pointcloud::Point3D*>, std::vector<float>);
         void backprop(bool, Node*);
+        Node *finalSelect(Node*);
     private:
         bool stepleg;
     };

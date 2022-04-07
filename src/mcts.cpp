@@ -7,22 +7,16 @@ namespace montecarlo
     {
         std::vector<float> goal = {-0.25,3.5, 0.25,4.0};
         Node *rnd = get_rootND(legs);;
-        for(int i=0; i<1000;i++)
+        for(int i=0; i<500;i++)
         {
-            std::cout << i << "th iteration" << std::endl;
             Node *snd = selection(rnd, pts);
             Node *end = expansion(snd);
             bool rslt = simulation(end, pts, goal);
             backprop(rslt, end);
-            // std::cout <<rslt << std::endl;
-            for(int j=0; j<rnd->childNDs[0]->childNDs.size(); j++)
-            {
-                std::cout << j << "th: "<<rnd->childNDs[0]->childNDs[j]->utc;
-                std::cout << "  "<<rnd->childNDs[0]->childNDs[j]->val;
-                std::cout << "  "<<rnd->childNDs[0]->childNDs[j]->vis << std::endl;
-            }
         }
+        Node *finalND = finalSelect(rnd->childNDs[0]);
         memoryDelete(rnd);
+        delete finalND;
     }
     Node *standard::selection(Node *nd, std::vector<pointcloud::Point3D*> pts)
     {
@@ -33,7 +27,7 @@ namespace montecarlo
         Node* snd = new Node();
         if(nd->candiNDs.size() == 0 && nd->childNDs.size() != 0)
         {
-            float max = -10;
+            float max = -10.0;
             Node* temp_nd = new Node();
             for(int i=0; i<nd->childNDs.size(); i++)
             {
@@ -112,6 +106,23 @@ namespace montecarlo
                 nd->parentND->childNDs[i]->utc = utcFunc(nd->parentND->childNDs[i]);
             }
         }
+    }
+    Node *standard::finalSelect(Node* nd)
+    {
+        float max = -10.0;
+        Node *maxND = new Node();
+        int index = 0;
+        for(int i=0; i<nd->childNDs.size(); i++)
+        {
+            float temp = float(nd->childNDs[i]->val) / float(nd->childNDs[i]->vis);
+            if(temp > max)
+            {
+                maxND = nd->childNDs[i];
+                max = temp;
+                index = i;
+            }
+        }
+        return maxND;
     }
 
     /////////////////////////////////////////////
