@@ -5,7 +5,7 @@
 int main(int argc, char**argv)
 {
     pointcloud::pcdFile fi;
-    std::string inputPath = "/home/hs/catkin_ws/src/real_mcts/data/with_sampling_3.pcd";
+    std::string inputPath = "/home/hs/catkin_ws/src/real_mcts/data/without_sampling_3.pcd";
     std::vector<pointcloud::Point3D*> inputPoints = fi.ReadPCDToVector(inputPath);
     std::vector<pointcloud::Point3D*> legs;
     std::vector<pointcloud::Point3D> leftLegs;
@@ -18,11 +18,17 @@ int main(int argc, char**argv)
     rightLegs.push_back(*leg2);
     //x = right, y=down, z=forward
 
-    std::vector<float> goal = {-0.1,2.5, 0.1,2.7};
+    std::vector<float> goal = {-0.1,2.0, 0.1,2.2};
     montecarlo::standard st;
-    for(int i=0; i<8;i++)
+    clock_t start;
+    clock_t end;
+
+    for(int i=0; i<4;i++)
     {
+        start = clock();
         pointcloud::Point3D pt = st.main(legs, inputPoints, goal);
+        end = clock();
+        std::cout << ((double)(end - start)) / (long)CLOCKS_PER_SEC << " sec" << std::endl;
         if(i%2 == 0)
         {
             rightLegs.push_back(*legs[0]);
