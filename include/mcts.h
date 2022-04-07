@@ -20,7 +20,7 @@ namespace montecarlo
             : pos(pos), vis(vis), val(val), utc(utc), 
             parentND(paND), candiNDs(caNDs), childNDs(chNDs) {}
         
-        pointcloud::Point3D* pos;
+        pointcloud::Point3D *pos;
         int vis;
         int val;
         float utc;
@@ -32,8 +32,17 @@ namespace montecarlo
     class standard
     {
     public:
-        void main(std::vector<pointcloud::Point3D*>, std::vector<pointcloud::Point3D*>);
+        pointcloud::Point3D main(std::vector<pointcloud::Point3D*>, std::vector<pointcloud::Point3D*>, std::vector<float>);
 
+        // MCTS main process
+        Node *get_rootND(std::vector<pointcloud::Point3D*>);
+        Node *selection(Node*, std::vector<pointcloud::Point3D*>);
+        Node *expansion(Node*);
+        bool simulation(Node*, std::vector<pointcloud::Point3D*>, std::vector<float>);
+        void backprop(bool, Node*);
+        pointcloud::Point3D finalSelect(Node*);
+
+        // MCTS utils
         void printNDpos(Node*);
         void get_candiND(Node*, std::vector<pointcloud::Point3D*>);
         float get_dist(pointcloud::Point3D*, pointcloud::Point3D*);
@@ -42,13 +51,6 @@ namespace montecarlo
         std::vector<pointcloud::Point3D*> get_simulND(pointcloud::Point3D*,pointcloud::Point3D*, std::vector<pointcloud::Point3D*>);
         float utcFunc(Node*);
         void memoryDelete(Node*);
-
-        Node *get_rootND(std::vector<pointcloud::Point3D*>);
-        Node *selection(Node*, std::vector<pointcloud::Point3D*>);
-        Node *expansion(Node*);
-        bool simulation(Node*, std::vector<pointcloud::Point3D*>, std::vector<float>);
-        void backprop(bool, Node*);
-        Node *finalSelect(Node*);
     private:
         bool stepleg;
     };

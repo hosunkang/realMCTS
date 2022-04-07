@@ -3,6 +3,7 @@ project(real_mcts)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  visualization_msgs
 )
 
 catkin_package(

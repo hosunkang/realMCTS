@@ -1,22 +1,22 @@
 #include "../include/mcts.h"
-#include "../include/pcutils.h"
 
 namespace montecarlo
 {
-    void standard::main(std::vector<pointcloud::Point3D*> legs, std::vector<pointcloud::Point3D*> pts)
+    pointcloud::Point3D standard::main(std::vector<pointcloud::Point3D*> legs, std::vector<pointcloud::Point3D*> pts, std::vector<float> goal)
     {
-        std::vector<float> goal = {-0.25,3.5, 0.25,4.0};
         Node *rnd = get_rootND(legs);;
-        for(int i=0; i<500;i++)
+        for(int i=0; i<1000;i++)
         {
             Node *snd = selection(rnd, pts);
             Node *end = expansion(snd);
             bool rslt = simulation(end, pts, goal);
             backprop(rslt, end);
         }
-        Node *finalND = finalSelect(rnd->childNDs[0]);
+        pointcloud::Point3D finalPT = finalSelect(rnd->childNDs[0]);
+        legs[1]->SetXYZ(legs[0]->GetX(), legs[0]->GetY(), legs[0]->GetZ());
+        legs[0]->SetXYZ(finalPT.GetX(), finalPT.GetY(), finalPT.GetZ());
         memoryDelete(rnd);
-        delete finalND;
+        return finalPT;
     }
     Node *standard::selection(Node *nd, std::vector<pointcloud::Point3D*> pts)
     {
@@ -107,7 +107,7 @@ namespace montecarlo
             }
         }
     }
-    Node *standard::finalSelect(Node* nd)
+    pointcloud::Point3D standard::finalSelect(Node* nd)
     {
         float max = -10.0;
         Node *maxND = new Node();
@@ -115,14 +115,19 @@ namespace montecarlo
         for(int i=0; i<nd->childNDs.size(); i++)
         {
             float temp = float(nd->childNDs[i]->val) / float(nd->childNDs[i]->vis);
+            // std::cout << i << "th: ";
+            // std::cout << temp << "  ";
+            // std::cout << nd->childNDs[i]->pos->GetX() << "  ";
+            // std::cout << nd->childNDs[i]->pos->GetY() << "  ";
+            // std::cout << nd->childNDs[i]->pos->GetZ() << std::endl;
             if(temp > max)
-            {
+            { 
                 maxND = nd->childNDs[i];
                 max = temp;
                 index = i;
             }
         }
-        return maxND;
+        return *maxND->pos;
     }
 
     /////////////////////////////////////////////
@@ -181,13 +186,19 @@ namespace montecarlo
     {
         for(int i=0; i<pts.size(); i++)
         {
-            float distance = get_dist(nd->pos, pts[i]);
-            float forward = pts[i]->GetZ() - nd->pos->GetZ();
-            float width = pts[i]->GetX() - nd->pos->GetX();
+            float distance = get_dist(nd->parentND->pos, pts[i]);
+            float forward = pts[i]->GetZ() - nd->parentND->pos->GetZ();
+            float width = pts[i]->GetX() - nd->parentND->pos->GetX();
+            float y1 = pts[i]->GetX() - nd->pos->GetX();
+            float y2 = nd->parentND->pos->GetX() - nd->pos->GetX();
+
             if(0.4 < distance && distance< 0.6 && forward > 0 && std::abs(width) > 0.4)
             {   
-                Node* temp = new Node(pts[i],nd); 
-                nd->candiNDs.push_back(temp);
+                if(std::abs(y1) < std::abs(y2))
+                {
+                    Node* temp = new Node(pts[i],nd); 
+                    nd->candiNDs.push_back(temp);
+                }
             }
         }
     }
@@ -199,9 +210,15 @@ namespace montecarlo
             float distance = get_dist(stand, pts[i]);
             float forward = pts[i]->GetZ() - stand->GetZ();
             float width = pts[i]->GetX() - stand->GetX();
+            float y1 = pts[i]->GetX() - swing->GetX();
+            float y2 = stand->GetX() - swing->GetX();
+
             if(0.4 < distance && distance< 0.6 && forward > 0 && std::abs(width) > 0.4)
             {
-                candis.push_back(pts[i]);
+                if(std::abs(y1) < std::abs(y2))
+                {
+                    candis.push_back(pts[i]);
+                }
             }
         }
         return candis;
